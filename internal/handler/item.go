@@ -3,7 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"store/internal/database"
 	"store/internal/model"
 	"strconv"
@@ -13,13 +15,13 @@ import (
 func CreateItem(w http.ResponseWriter, r *http.Request) {
 	userID, err := getUserIDFromToken(r)
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	var req model.CreateItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
 
@@ -33,7 +35,7 @@ func CreateItem(w http.ResponseWriter, r *http.Request) {
 
 	err = database.CreateItem(item)
 	if err != nil {
-		http.Error(w, "Failed to create item", http.StatusInternalServerError)
+		http.Error(w, "failed to create item", http.StatusInternalServerError)
 		return
 	}
 
@@ -129,7 +131,7 @@ func ListItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		http.Error(w, "Ошибка при получении товаров", http.StatusInternalServerError)
+		http.Error(w, "error when receiving items", http.StatusInternalServerError)
 		return
 	}
 
@@ -168,4 +170,39 @@ func convertItemsToResponse(items []model.Item, currentUserID int) []model.ItemR
 	}
 
 	return result
+}
+
+// POST/uploadimage
+func UploadImage(w http.ResponseWriter, r *http.Request) {
+	// Ограничим размер файла
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		http.Error(w, "form parsing error: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	file, handler, err := r.FormFile("image")
+	if err != nil {
+		http.Error(w, "error reading file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Сохраняем файл
+	dstPath := fmt.Sprintf("uploads/%s", handler.Filename)
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		http.Error(w, "failed to save file", http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+
+	_, err = io.Copy(dst, file)
+	if err != nil {
+		http.Error(w, "copy error", http.StatusInternalServerError)
+		return
+	}
+
+	// Возвращаем путь
+	JSON(w, map[string]string{"imagePath": dstPath}, http.StatusOK)
 }
