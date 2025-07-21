@@ -1,8 +1,8 @@
 # 1. Используем официальный образ Go
-FROM golang:1.21-alpine
+FROM golang:1.24-alpine
 
 # 2. Установка зависимостей
-RUN apk add --no-cache git
+#RUN apk add --no-cache git
 
 # 3. Устанавливаем рабочую директорию
 WORKDIR /app
@@ -21,10 +21,11 @@ RUN go build -o server ./cmd/main.go
 #RUN mkdir -p uploads
 
 # 8. Экспонируем порт
-EXPOSE ${PORT}
+#EXPOSE ${PORT}
+
 
 # 9. Устанавливаем переменные окружения по умолчанию
-ENV PORT=8080
+#ENV PORT=8080
 
 # 10. Запускаем сервер
 CMD ["./server"]

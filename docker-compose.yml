@@ -1,12 +1,13 @@
-version: '3.8'
-
 services:
   app:
     build: .
     ports:
-      - "${PORT}:${PORT}"
+      - "8080:8080"  # Жёстко фиксируем порт
+    environment:
+      - PORT=8080  # Явно задаём значение
+      - DB_PATH=/app/store.db
+      - JWT_SECRET=my_secret_123
     volumes:
-      - ./uploads:/app/uploads  # сохраняем загруженные изображения
-      - ./store.db:/app/store.db  # база данных (если SQLite)
-    env_file:
-      - .env
+      - ./uploads:/app/uploads
+      - ./store.db:/app/store.db
+    restart: unless-stopped
