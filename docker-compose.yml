@@ -2,9 +2,9 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"  # Жёстко фиксируем порт
+      - "8080:8080"  
     environment:
-      - PORT=8080  # Явно задаём значение
+      - PORT=8080  
       - DB_PATH=/app/store.db
       - JWT_SECRET=my_secret_123
     volumes:
