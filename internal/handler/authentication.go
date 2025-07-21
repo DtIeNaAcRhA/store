@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"store/internal/config"
 	"strings"
@@ -13,12 +13,12 @@ import (
 func getUserIDFromToken(r *http.Request) (int, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return 0, errors.New("Authorization header missing")
+		return 0, fmt.Errorf("Authorization header missing")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return 0, errors.New("Authorization header format must be Bearer {token}")
+		return 0, fmt.Errorf("Authorization header format must be Bearer {token}")
 	}
 
 	tokenStr := parts[1]
@@ -27,7 +27,7 @@ func getUserIDFromToken(r *http.Request) (int, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		// Проверяем метод подписи
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
+			return nil, fmt.Errorf("unexpected signing method")
 		}
 		return []byte(config.AppConfig.JWTSecret), nil
 	}, jwt.WithLeeway(5*time.Second)) // допустим небольшой leeway на время
@@ -37,17 +37,17 @@ func getUserIDFromToken(r *http.Request) (int, error) {
 	}
 
 	if !token.Valid {
-		return 0, errors.New("invalid token")
+		return 0, fmt.Errorf("invalid token")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, errors.New("invalid claims")
+		return 0, fmt.Errorf("invalid claims")
 	}
 
 	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
-		return 0, errors.New("user_id not found in token claims")
+		return 0, fmt.Errorf("user_id not found in token claims")
 	}
 
 	return int(userIDFloat), nil

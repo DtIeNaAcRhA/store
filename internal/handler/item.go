@@ -10,6 +10,7 @@ import (
 	"strconv"
 )
 
+// создание товара
 func CreateItem(w http.ResponseWriter, r *http.Request) {
 	userID, err := getUserIDFromToken(r)
 	if err != nil {
