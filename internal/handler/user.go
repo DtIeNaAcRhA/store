@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// POST /register
+// POST/register
 func Register(w http.ResponseWriter, r *http.Request) {
 	var req model.RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -46,7 +46,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	JSON(w, model.RegisterResponse{Message: "Пользователь успешно зарегистрирован"}, http.StatusCreated)
 }
 
-// POST /login
+// POST/login
 func Login(w http.ResponseWriter, r *http.Request) {
 	var req model.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

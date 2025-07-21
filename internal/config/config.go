@@ -16,10 +16,9 @@ type Config struct {
 var AppConfig Config
 
 func Load() {
-	// Загружаем переменные из файла .env (или config.env)
 	err := godotenv.Load("./config.env")
 	if err != nil {
-		log.Println("Не удалось загрузить config.env, будут использованы значения по умолчанию")
+		log.Println("Failed to load config.env, default values will be used")
 	}
 
 	AppConfig = Config{
@@ -33,6 +32,6 @@ func getEnv(key, defaultVal string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
-	log.Printf("Переменная окружения %s не найдена, используется значение по умолчанию", key)
+	log.Printf("Environment variable %s not found, using default value", key)
 	return defaultVal
 }

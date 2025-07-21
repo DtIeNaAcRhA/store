@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"store/internal/model"
 )
 
@@ -41,11 +42,13 @@ func CreateItem(item *model.Item) error {
 
 // Получить товары, отсортированные по дате (новые первыми)
 func GetItemsByDate(minPrice, maxPrice float64, order string, limit, offset int) ([]model.Item, error) {
+	log.Println("Sort by date")
 	return getItemsWithFilters("item.created_at", minPrice, maxPrice, order, limit, offset)
 }
 
 // Получить товары, отсортированные по цене
 func GetItemsByPrice(minPrice, maxPrice float64, order string, limit, offset int) ([]model.Item, error) {
+	log.Println("Sort by price")
 	return getItemsWithFilters("item.price", minPrice, maxPrice, order, limit, offset)
 }
 
@@ -74,11 +77,6 @@ func getItemsWithFilters(sortField string, minPrice, maxPrice float64, order str
 	if maxPrice > 0 {
 		query += fmt.Sprintf(" AND item.price <= %f", maxPrice)
 	}
-
-	// Проверка корректности сортировки
-	// if order != "ASC" {
-	// 	order = "DESC"
-	// }
 
 	query += fmt.Sprintf(" ORDER BY %s %s LIMIT %d OFFSET %d", sortField, order, limit, offset)
 

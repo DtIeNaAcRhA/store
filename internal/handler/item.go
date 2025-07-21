@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"store/internal/database"
 	"store/internal/model"
@@ -64,6 +63,7 @@ func CreateItem(w http.ResponseWriter, r *http.Request) {
 	JSON(w, response, http.StatusCreated)
 }
 
+// парсинг запороса при GET/items (пример запроса: /items?sort=price&max=3000&order=asc&limit=100)
 func ParseListItemsRequest(r *http.Request) model.ListItemsRequest {
 	q := r.URL.Query()
 
@@ -79,42 +79,36 @@ func ParseListItemsRequest(r *http.Request) model.ListItemsRequest {
 
 	if v := q.Get("sort"); v == "price" {
 		req.Sort = v
-		log.Print("получили sort")
 	}
 	if v := q.Get("order"); v == "asc" {
 		req.Order = v
-		log.Print("получили order")
 	}
 
 	if v := q.Get("min"); v != "" {
 		if f, err := strconv.ParseFloat(v, 64); err == nil {
 			req.MinPrice = f
-			log.Print("получили min")
 		}
 	}
 	if v := q.Get("max"); v != "" {
 		if f, err := strconv.ParseFloat(v, 64); err == nil {
 			req.MaxPrice = f
-			log.Print("получили max")
 		}
 	}
 	if v := q.Get("limit"); v != "" {
 		if i, err := strconv.Atoi(v); err == nil {
 			req.Limit = i
-			log.Print("получили limit")
 
 		}
 	}
 	if v := q.Get("offset"); v != "" {
 		if i, err := strconv.Atoi(v); err == nil {
 			req.Offset = i
-			log.Print("получили offset")
 		}
 	}
-
 	return req
 }
 
+// GET/items
 func ListItems(w http.ResponseWriter, r *http.Request) {
 	req := ParseListItemsRequest(r)
 
@@ -139,23 +133,27 @@ func ListItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := model.ListItemsResponse{
-		Items: convertItemsToResponse(items, userID),
-		Total: len(items),
+	switch {
+	case userID != 0:
+		resp := model.ListItemsResponseAuth{
+			Items: convertItemsToResponse(items, userID),
+			Total: len(items),
+		}
+		JSON(w, resp, http.StatusOK)
+	default:
+		resp := model.ListItemsResponseNotAuth{
+			Items: items,
+			Total: len(items),
+		}
+		JSON(w, resp, http.StatusOK)
 	}
-
-	JSON(w, resp, http.StatusOK)
 }
 
+// добавляем признак принадлежности товара авторизованному пользователю
 func convertItemsToResponse(items []model.Item, currentUserID int) []model.ItemResponse {
 	var result []model.ItemResponse
 
 	for _, item := range items {
-		user, err := database.GetUserByID(item.UserID)
-		if err != nil {
-			log.Println("не получилось достать юзера")
-		}
-
 		resp := model.ItemResponse{
 			ID:              item.ID,
 			Title:           item.Title,
@@ -163,10 +161,9 @@ func convertItemsToResponse(items []model.Item, currentUserID int) []model.ItemR
 			ImagePath:       item.ImagePath,
 			Price:           item.Price,
 			CreatedAt:       item.CreatedAt.String(),
-			AuthorLogin:     user.Username,
+			AuthorLogin:     item.AuthorLogin,
 			IsOwner:         currentUserID == item.UserID,
 		}
-		log.Println("добавили", resp)
 		result = append(result, resp)
 	}
 

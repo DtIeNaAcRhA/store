@@ -39,6 +39,7 @@ type CreateItemRequest struct {
 	Price       float64 `json:"price"`
 }
 
+//объявления
 type ListItemsRequest struct {
 	Sort     string  `json:"sort"`   // "price" или "date"
 	Order    string  `json:"order"`  // "asc" или "desc"
@@ -48,8 +49,14 @@ type ListItemsRequest struct {
 	Offset   int     `json:"offset"` // смещение
 }
 
-// Список товаров
-type ListItemsResponse struct {
+// Список товаров для авторизованных
+type ListItemsResponseAuth struct {
 	Items []ItemResponse `json:"items"`
 	Total int            `json:"total"`
+}
+
+// Список товаров для неавторизованных
+type ListItemsResponseNotAuth struct {
+	Items []Item `json:"items"`
+	Total int    `json:"total"`
 }

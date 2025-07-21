@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	// _ "github.com/mattn/go-sqlite3"
+
 	_ "modernc.org/sqlite"
 )
 
@@ -16,11 +16,10 @@ func InitDB(filepath string) error {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Включаем foreign keys
 	_, err = DB.Exec(`PRAGMA foreign_keys = ON`)
 	if err != nil {
 		return fmt.Errorf("failed to enable foreign keys: %w", err)
 	}
 	return nil
-	//return DB.Ping()
+
 }

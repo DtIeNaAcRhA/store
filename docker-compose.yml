@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ./uploads:/app/uploads  # сохраняем загруженные изображения
+      - ./store.db:/app/store.db  # база данных (если SQLite)
+    env_file:
+      - .env

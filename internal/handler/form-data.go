@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// POST/uploadimage
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	// Ограничим размер файла
 	err := r.ParseMultipartForm(10 << 20) // 10 MB

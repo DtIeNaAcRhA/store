@@ -8,17 +8,19 @@ import (
 	"store/internal/model"
 )
 
+// создание пользователя
 func CreateUser(user *model.User) error {
 	stmt := `INSERT INTO user (username, hash_password) VALUES (?, ?)`
 	res, err := DB.Exec(stmt, user.Username, user.HashPassword)
 	if err != nil {
 		return err
 	}
-	id, _ := res.LastInsertId() //что делает метод LastInsertId?
+	id, _ := res.LastInsertId()
 	user.ID = uint(id)
 	return nil
 }
 
+// поиск пользователя по логину
 func GetUserByLogin(login string) (*model.User, error) {
 	row := DB.QueryRow(`SELECT id, username, hash_password FROM user WHERE username = ?`, login)
 	var user model.User

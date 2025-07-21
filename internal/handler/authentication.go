@@ -13,19 +13,18 @@ import (
 func getUserIDFromToken(r *http.Request) (int, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		return 0, fmt.Errorf("Authorization header missing")
+		return 0, fmt.Errorf("authorization header missing")
 	}
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		return 0, fmt.Errorf("Authorization header format must be Bearer {token}")
+		return 0, fmt.Errorf("authorization header format must be Bearer {token}")
 	}
 
 	tokenStr := parts[1]
 
-	// Парсим токен с использованием jwt.Parse с опциями проверки
+	// Парсинг токена
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		// Проверяем метод подписи
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
